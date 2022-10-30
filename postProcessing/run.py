@@ -35,6 +35,20 @@
 
 ####################################################################
 
+####################################################################
+
+
+###  COMMON TERMS TRANSLATIONS:  ###
+
+##  'parafanghi'  =    mudguards  ##
+##  'carena'      =    fairing    ##
+##  'pilota'      =    rider      ##
+##  'alette'      =    wings      ##
+##  'coda'        =    tail       ##
+
+
+####################################################################
+
 
 # flags to decide whether to use Telegram
 tg = True
@@ -47,7 +61,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
 if tg:
-    import telegram, telegram_send
+    import telegram
 
 # flexing loretet's ASCII drawing's skills
 print('''
@@ -67,8 +81,6 @@ __________________________________________________
 time.sleep(0.3)
 
 # initialization of some useful variables
-file = __file__
-perc = os.path.dirname(file)
 cwd = os.getcwd()
 if tg:
     bot = telegram.Bot(token='2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM')
@@ -96,13 +108,6 @@ while True:
 
 sys.stdout.write(f"Hello {name} :) \n")
 time.sleep(0.3)
-
-
-# creation of the 'results' folder to store the post processing results
-try:
-    os.makedirs(os.path.join(perc, "results"))
-except FileExistsError:
-    sys.stdout.write("\nThe \'results\' folder already existed.\n")
 
 # Telegram bot advises that somebody started a simulation
 if tg:
@@ -158,22 +163,6 @@ if good:
     time.sleep(0.6)
     start_pp = time.time()
 
-
-####################################################################
-
-
-###  COMMON TERMS TRANSLATIONS:  ###
-
-##  'parafanghi'  =    mudguards  ##
-##  'carena'      =    fairing    ##
-##  'pilota'      =    rider      ##
-##  'alette'      =    wings      ##
-##  'coda'        =    tail       ##
-
-
-####################################################################
-
-if good: 
     try: 
         exec(open("./newPostProcessing.py").read())
         
