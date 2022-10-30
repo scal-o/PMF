@@ -1,5 +1,7 @@
-''' LIBRERIA DI FUNZIONI PER IL POSTPROCESSING '''
-''' DA MODIFICARE SOLO IN CASO CI SIA QUALCHE PROBLEMA '''
+# code by scalo
+
+# LIBRERIA DI FUNZIONI PER IL POSTPROCESSING
+# DA MODIFICARE SOLO IN CASO CI SIA QUALCHE PROBLEMA
 
 import re, math
 import numpy
@@ -11,8 +13,8 @@ import matplotlib.ticker as ticker
 # svolge l'analisi statistica dei dati, calcolando media, 
 # dev. standard ed intervallo di confidenza
 def statistical_analysis(cx): 
-    """Svolge l'analisi statistica dei dati. calcola media,
-    dev. standard ed intervallo di confidenza al 99%. """
+    # Svolge l'analisi statistica dei dati. calcola media,
+    # dev. standard ed intervallo di confidenza al 99%.
     cx_mean = numpy.mean(cx)
     cx_dev_std = numpy.std(cx, ddof = 1) # ddof = 1 per dividere per N-1
     cx_conf_lev99 = 2.58*(cx_dev_std)/(math.sqrt(len(cx)))
