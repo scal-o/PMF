@@ -56,12 +56,11 @@ tg = True
 # importing all the necessary modules
 
 import itertools, os, math, re, sys, threading, time
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import numpy as np
+
 if tg:
     import telegram
+    bot = telegram.Bot(token='2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM')
+    chat_id = ["-1001580210471"]
 
 # flexing loretet's ASCII drawing's skills
 print('''
@@ -80,21 +79,14 @@ __________________________________________________
 ''')
 time.sleep(0.3)
 
-# initialization of some useful variables
 cwd = os.getcwd()
-if tg:
-    bot = telegram.Bot(token='2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM')
-    chat_id = ["-1001580210471"]
+good = True
 
 # log in
 while True:
     name = str(input("Who are you? ")).title()
-    lista_name = list(name)
-    for i in lista_name:
-        if i.isspace():
-            lista_name.remove(i)
-    name_join = "".join(lista_name)
-    if not (name_join.isalpha()):
+    name = name.strip()
+    if not (name.isalpha()):
         print("Please, insert your name without any numbers or punctuation marks.\n")
         continue
     break
@@ -109,38 +101,59 @@ while True:
 sys.stdout.write(f"Hello {name} :) \n")
 time.sleep(0.3)
 
-# Telegram bot advises that somebody started a simulation
+# Telegram bot announces that somebody started a simulation
 if tg:
     for id in chat_id:
         bot.sendMessage(id, f"{name} just started a simulation. ETA: {eta} hours.")
 
-# shell running 'sh Allrun.sh' to run the simulation
-time.sleep(0.4)
-start_sim = time.time()
-os.system("echo ")
-os.system("echo Starting the simulation...")
+# creation of the 0/ and system/ directories, if needed
+while True:
+    try:
+        dir = input("\nDo you need to create the 0/ and system/ directories? (y/n): ").lower()
+    except: 
+        print("\nPlease only insert y or n as an answer")
+        continue
 
-# loading animation (why needed? Because yes.)
-done = False
-os.system("echo ")
-def animate():
-    for char in itertools.cycle( ['|','/','-','\\'] ):
-        if done:
-            break
-        sys.stdout.write('\r' + char)
-        sys.stdout.flush()
-        time.sleep(0.2)
-    os.system("echo ")
+    if dir == "y":
+        try:
+            exec(open("./directories.py").read())
+        except Exception as Er:
+            print(f"\nSomething went wrong during the creation of the directories. Error: {Er}")
+            good = False
+        break
+    elif dir == "n":
+        break
+    
 
-threading.Thread(target=animate).start()
+if good:       
+    # shell running 'sh Allrun.sh' to run the simulation
+    time.sleep(0.4)
+    start_sim = time.time()
+    sys.stdout.write("\nStarting the simulation...\n")
 
-# running the Allrun
-good = True
-try:
-    os.system("sh Allrun.sh")
-    done = True
-except:
-    good = False
+    # loading animation (why needed? Because yes.)
+    done = False
+    def animate():
+        for char in itertools.cycle( ['|','/','-','\\'] ):
+            if done:
+                break
+            sys.stdout.write('\r' + char)
+            sys.stdout.flush()
+            time.sleep(0.2)
+        os.system("echo ")
+
+    threading.Thread(target=animate).start()
+
+    # running the Allrun
+    try:
+        os.system("sh Allrun.sh")
+        done = True
+    except Exception as Er:
+        print(f"\nSomething went wrong during the simulation. Error: {Er}")
+        if tg:
+            for id in chat_id:
+                bot.sendMessage(id, f"{name}'s simulation crashed for some reason. Error: {Er}")
+        good = False
 
 # printing of simulation time on console and on Telegram
 if good:
@@ -158,8 +171,8 @@ if good:
             for id in chat_id:
                 bot.sendMessage(id, f"{name}'s simulation ended after {sim_time_min} minutes.")
 
-    # inizio il post processing
-    os.system("echo '\nStarting post processing automation...'")
+    # starts post processing
+    sys.stdout.write("\nStarting post processing automation...")
     time.sleep(0.6)
     start_pp = time.time()
 
@@ -174,40 +187,27 @@ if good:
         if tg:
             for id in chat_id:
                 bot.sendMessage(id, f"{name}'s simulation has been post processed in {pp_time_min} minutes.")
-        pv = True
+        pp = True
 
-    except Exception as er:
-        print("Something went wrong during post processing. Error:\n")
-        print(er)
-        # pv = False
+    except Exception as Er:
+        print(f"Something went wrong during post processing. Error:\n{Er}")
+
         if tg:
             for id in chat_id:
-                bot.sendMessage(id, f"{name}'s simulation couldn't be post processed for some reason. Last error:\n {er}")
-
-
-####################################################################
-
-
-# ends the script
-if good:
-    os.system("echo ")
-    time.sleep(0.6)
-    if pv:
-        sys.stdout.write("The case is ready to be studied in Paraview." + '\n' + "Remember to have a look inside the \'results\' folder!\n")
-    else:
-        sys.stdout.write("The case is ready to be studied in Paraview!\n")
-else:
-    print("Something went wrong during the simulation.")
-    if tg:
-        for id in chat_id:
-            bot.sendMessage(id, f"{name}'s simulation crashed for some reason.")
+                bot.sendMessage(id, f"{name}'s simulation couldn't be post processed for some reason. Last error:\n{Er}")
+        pp = False
 
 
 ####################################################################
 
 
 # sends the pictures in the 'results' folder
-if tg and pv:
+if tg and pp and good:
+
+    sys.stdout.write("\nSending results ...")
+
+    done = False
+    threading.Thread(target=animate).start()
 
     # crea la lista di immagini da inviare e la lambda function per tagliarla (send_media_group permette di inviare solo 10 immagini per volta)
     images = []
@@ -226,3 +226,12 @@ if tg and pv:
         bot.send_document(id, open(txt))
         for chunk in images_final:
             bot.send_media_group(id, chunk)
+
+    done = True
+
+if good:
+    sys.stdout.write("Everything's done! Quitting...\n")
+    time.sleep(1)
+else:
+    print("\nQuitting ...\n")
+    time.sleep(1)
