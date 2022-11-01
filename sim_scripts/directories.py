@@ -90,7 +90,7 @@ while default == "" or flag == False:
 
 cwd = os.getcwd()
 
-general_fun_dir = os.path.join(cwd, "general_functions")
+general_fun_dir = os.path.join("P:", "script", "system")
 
 zero_dir = os.path.join(cwd, "0")
 system_dir = os.path.join(cwd, "system")
