@@ -1,5 +1,6 @@
 import os, re, warnings
 from shutil import copy
+import pathlib
 
 def sub(regex, new_line, skipline=False):
     global line, new_lines, f
@@ -90,7 +91,7 @@ while default == "" or flag == False:
 
 cwd = os.getcwd()
 
-general_fun_dir = os.path.join("P:", "script", "system")
+general_fun_dir = pathlib.Path("/mnt/p/script/system")
 
 zero_dir = os.path.join(cwd, "0")
 system_dir = os.path.join(cwd, "system")
@@ -108,9 +109,11 @@ for file in os.scandir(zero_dir):
             while line != '':
                 
                 if re.search("boundaryField", line):
+                    new_lines.append(line)
                     line = f.readline()
                     new_lines.append(line)
                     new_lines.append("\t#includeEtc \"caseDicts/setConstraintTypes\"\n")
+                    line = f.readline()
 
                 
                 elif re.search("domain", line):
