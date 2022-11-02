@@ -120,6 +120,9 @@ while True:
         except Exception as Er:
             print(f"\nSomething went wrong during the creation of the directories. Error: {Er}")
             good = False
+            if tg:
+                for id in chat_id:
+                    bot.sendMessage(id, f"Something went wrong during the creation of the directories. Error: {Er}")
         break
     elif dir == "n":
         break
