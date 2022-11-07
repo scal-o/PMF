@@ -135,7 +135,7 @@ for file in os.scandir(zero_dir):
 
 
                 elif re.search("outlet|ground", line) and re.search("U", filename):
-                    sub("value", f"\t\tvalue uniform({speed}. 0. 0.);\n")
+                    sub("value", f"\t\tvalue uniform ({speed}. 0. 0.);\n")
 
 
                 new_lines.append(line)
@@ -158,7 +158,7 @@ with open(os.path.join(system_dir, "controlDict"), "r") as c:
             for file in os.scandir(general_fun_dir):
                 copy(file.path, system_dir)
                 if file.name != "functionTimeControl":
-                    new_lines.append("\t#include " + file.name + "\n")
+                    new_lines.append(f"\t#include \"{file.name}\"\n")
             new_lines.append("\n")
 
             while not re.search("residuals", line):
@@ -203,7 +203,7 @@ with open(os.path.join(system_dir, "fvSolution"), "r") as fv:
     while line != '':
 
         if re.search("relTol", line):
-            new_lines.append(f"\trelTol\t\t {relTol}\n")
+            new_lines.append(f"\trelTol\t\t {relTol};\n")
         else:
             new_lines.append(line)
         
@@ -220,7 +220,7 @@ with open(os.path.join(system_dir, "forcesCarena"), "r") as forces:
     line = forces.readline()
     while line != '':
         if re.search("patches", line):
-            line = line.replace("^carena", carena)
+            line = f"\tpatches\t\t({carena});\n"
         
         new_lines.append(line)
         line = forces.readline()
@@ -236,7 +236,7 @@ with open(os.path.join(system_dir, "forcesParafango"), "r") as forces:
     line = forces.readline()
     while line != '':
         if re.search("patches", line):
-            line = line.replace("^parafango", paraf_ant)
+            line = f"\tpatches\t\t({paraf_ant});\n"
         
         new_lines.append(line)
         line = forces.readline()
@@ -252,7 +252,7 @@ with open(os.path.join(system_dir, "forcesParafPost"), "r") as forces:
     line = forces.readline()
     while line != '':
         if re.search("patches", line):
-            line = line.replace("^parafango", paraf_post)
+            line = f"\tpatches\t\t({paraf_post});\n"
         
         new_lines.append(line)
         line = forces.readline()
