@@ -137,6 +137,8 @@ for file in os.scandir(zero_dir):
                 elif re.search("outlet|ground", line) and re.search("U", filename):
                     sub("value", f"\t\tvalue uniform ({speed}. 0. 0.);\n")
 
+                elif re.search("internalField", line) and re.search("U", filename):
+                    line = f"internalField uniform ({speed}. 0. 0.);\n"
 
                 new_lines.append(line)
                 line = f.readline()            

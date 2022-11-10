@@ -89,22 +89,10 @@ while True:
     if not (name.isalpha()):
         print("Please, insert your name without any numbers or punctuation marks.\n")
         continue
+
+    sys.stdout.write(f"Hello {name} :) \n")
+    time.sleep(0.3)
     break
-
-while True:
-    try:
-        eta = float(input("ETA of the simulation (hours.minutes): "))
-        break
-    except:
-        print("Only numbers and points allowed. Use . as separator, if needed.\n")
-
-sys.stdout.write(f"Hello {name} :) \n")
-time.sleep(0.3)
-
-# Telegram bot announces that somebody started a simulation
-if tg:
-    for id in chat_id:
-        bot.sendMessage(id, f"{name} just started a simulation. ETA: {eta} hours.")
 
 # creation of the 0/ and system/ directories, if needed
 while True:
@@ -120,13 +108,37 @@ while True:
         except Exception as Er:
             print(f"\nSomething went wrong during the creation of the directories. Error: {Er}")
             good = False
-            if tg:
-                for id in chat_id:
-                    bot.sendMessage(id, f"Something went wrong during the creation of the directories. Error: {Er}")
         break
     elif dir == "n":
         break
     
+
+while True:
+    try:
+        dir = input("\nDo you want to start the simulation? (y/n): ").lower()
+    except: 
+        print("\nPlease only insert y or n as an answer")
+        continue
+
+    if dir == "y":
+        break
+    elif dir == "n":
+        good = False
+        break
+
+
+if good:
+    while True:
+        try:
+            eta = float(input("ETA of the simulation (hours.minutes): "))
+            break
+        except:
+            print("Only numbers and points allowed. Use . as separator, if needed.\n")
+
+    # Telegram bot announces that somebody started a simulation
+    if tg:
+        for id in chat_id:
+            bot.sendMessage(id, f"{name} just started a simulation. ETA: {eta} hours.")
 
 if good:       
     # shell running 'sh Allrun.sh' to run the simulation
