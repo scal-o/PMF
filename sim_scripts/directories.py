@@ -33,11 +33,17 @@ def enlist_patches(to_remove):
         new_lines.append(patch)
 
         if re.search("carena", patch):
-            carena = patch.strip("\t\n")
+            if carena == False:
+                carena = []
+            carena.append(patch.strip("\t\n"))
         elif re.search("parafango_ant", patch):
-            paraf_ant = patch.strip("\t\n")
+            if paraf_ant == False:
+                paraf_ant = []
+            paraf_ant.append(patch.strip("\t\n"))
         elif re.search("parafango_post", patch):
-            paraf_post = patch.strip("\t\n")
+            if paraf_post == False:
+                paraf_post = []
+            paraf_post.append(patch.strip("\t\n"))
 
         elif re.search("pilota", patch):
             pilota = True
@@ -92,6 +98,7 @@ while default == "" or flag == False:
 cwd = os.getcwd()
 
 general_fun_dir = pathlib.Path("/mnt/p/script/system")
+
 
 zero_dir = os.path.join(cwd, "0")
 system_dir = os.path.join(cwd, "system")
@@ -222,7 +229,13 @@ with open(os.path.join(system_dir, "forcesCarena"), "r") as forces:
     line = forces.readline()
     while line != '':
         if re.search("patches", line):
-            line = f"\tpatches\t\t({carena});\n"
+            line = "\tpatches\t\t(\n"
+            new_lines.append(line)
+            for patch in carena:
+                line = f"\t\t\t{patch}\n"
+                new_lines.append(line)
+            
+            line = "\t\t\t\t);\n"
         
         new_lines.append(line)
         line = forces.readline()
@@ -238,8 +251,14 @@ with open(os.path.join(system_dir, "forcesParafango"), "r") as forces:
     line = forces.readline()
     while line != '':
         if re.search("patches", line):
-            line = f"\tpatches\t\t({paraf_ant});\n"
-        
+            line = "\tpatches\t\t(\n"
+            new_lines.append(line)
+            for patch in paraf_ant:
+                line = f"\t\t\t{patch}\n"
+                new_lines.append(line)
+            
+            line = "\t\t\t\t);\n"
+
         new_lines.append(line)
         line = forces.readline()
 
@@ -254,8 +273,14 @@ with open(os.path.join(system_dir, "forcesParafPost"), "r") as forces:
     line = forces.readline()
     while line != '':
         if re.search("patches", line):
-            line = f"\tpatches\t\t({paraf_post});\n"
-        
+            line = "\tpatches\t\t(\n"
+            new_lines.append(line)
+            for patch in paraf_post:
+                line = f"\t\t\t{patch}\n"
+                new_lines.append(line)
+            
+            line = "\t\t\t\t);\n"
+
         new_lines.append(line)
         line = forces.readline()
 
