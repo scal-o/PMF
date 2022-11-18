@@ -28,7 +28,7 @@
 # CFD group ID: -1001568561105
 # CFD channel ID: -1001580210471
 # PMF_CFD_BOT API token: 2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM
-
+# prova channel ID: -1001775370943
 ####################################################################
 
 ###  COMMON TERMS TRANSLATIONS:  ###
@@ -47,7 +47,7 @@ tg = False
 if tg:
     import telegram
     bot = telegram.Bot(token='2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM')
-    chat_id = ["-1001580210471"]
+    chat_id = ["-1001775370943"]
 
 def tg_message(tg, text):
     if tg:
@@ -58,7 +58,7 @@ def tg_message(tg, text):
 
 
 # importing all the necessary modules
-import itertools, os, re, sys, threading, time
+import itertools, os, re, sys, threading, time, subprocess
 
 
 # flexing loretet's ASCII drawing's skills
@@ -140,7 +140,7 @@ if good:
 
 if good:       
     # shell running 'sh Allrun.sh' to run the simulation
-    time.sleep(0.4)
+    time.sleep(0.1)
     start_sim = time.time()
     sys.stdout.write("\nStarting the simulation...\n")
 
@@ -159,14 +159,15 @@ if good:
 
     # running the Allrun
     try:
-        os.system("sh Allrun.sh")
-        done = True
+        subprocess.run(["sh", "Allrun.sh"], check=True)
     except Exception as Er:
         print(f"\nSomething went wrong during the simulation. Error: {Er}")
         tg_message(tg, f"{name}'s simulation crashed for some reason. Error: {Er}")
         good = False
+    done = True
 
 # printing of simulation time on console and on Telegram
+pp = True
 if good:
     end_sim = time.time()
     sim_time_min = round(( (end_sim-start_sim ) / 60) , 2)
@@ -192,7 +193,7 @@ if good:
         time.sleep(0.8)
         sys.stdout.write("The post processing has ended and lasted " + str( pp_time_min ) + " minutes." + '\n')
         tg_message(tg, f"{name}'s simulation has been post processed in {pp_time_min} minutes.")
-        pp = True
+
 
     except Exception as Er:
         print(f"Something went wrong during post processing. Error:\n{Er}")
@@ -207,7 +208,7 @@ if good:
 # sends the pictures in the 'results' folder
 if tg and pp and good:
 
-    sys.stdout.write("\nSending results ...")
+    sys.stdout.write("\nSending results ...\n")
 
     done = False
     threading.Thread(target=animate).start()
@@ -225,11 +226,13 @@ if tg and pp and good:
     
     images_final = final_list(images)
         
-    for id in chat_id:
-        bot.send_document(id, open(txt))
+    try:
+        for id in chat_id:
+            bot.send_document(id, open(txt))
         for chunk in images_final:
             bot.send_media_group(id, chunk)
-
+    except Exception as Er:
+        print(f"Something went wrong during the sending of the documents. Error:\n{Er}")
     done = True
 
 if good:

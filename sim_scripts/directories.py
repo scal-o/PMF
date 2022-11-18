@@ -98,9 +98,12 @@ while default == "" or flag == False:
 cwd = os.getcwd()
 cwd = pathlib.Path(cwd)
 
+
 general_fun_dir = pathlib.Path("/mnt/p/script/system")
 if not general_fun_dir.is_dir():
     general_fun_dir = pathlib.Path("C:/Users/alexs/Documents/GitHub/PMF/general_functions")
+if not general_fun_dir.is_dir():
+    general_fun_dir = pathlib.Path("/mnt/c/users/alexs/Documents/GitHub/PMF/general_functions")
 
 zero_dir = cwd / "0"
 system_dir = cwd / "system"
