@@ -42,7 +42,7 @@
 
 ####################################################################
 
-
+# ciao questa è la branch di tg
 # flags to decide whether to use Telegram
 tg = False
 
