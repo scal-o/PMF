@@ -42,18 +42,24 @@
 
 ####################################################################
 
-# ciao questa è la branch di tg
-# flags to decide whether to use Telegram
+# setting up telegram
 tg = False
-
-# importing all the necessary modules
-
-import itertools, os, re, sys, threading, time
-
 if tg:
     import telegram
     bot = telegram.Bot(token='2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM')
     chat_id = ["-1001580210471"]
+
+def tg_message(tg, text):
+    if tg:
+        global bot, chat_id
+
+        for id in chat_id:
+            bot.sendMessage(id, text)
+
+
+# importing all the necessary modules
+import itertools, os, re, sys, threading, time
+
 
 # flexing loretet's ASCII drawing's skills
 print('''
@@ -72,6 +78,7 @@ __________________________________________________
 ''')
 time.sleep(0.3)
 
+# initiating variables
 cwd = os.getcwd()
 good = True
 
@@ -129,9 +136,7 @@ if good:
             print("Only numbers and points allowed. Use . as separator, if needed.\n")
 
     # Telegram bot announces that somebody started a simulation
-    if tg:
-        for id in chat_id:
-            bot.sendMessage(id, f"{name} just started a simulation. ETA: {eta} hours.")
+    tg_message(tg, f"{name} just started a simulation. ETA: {eta} hours.")
 
 if good:       
     # shell running 'sh Allrun.sh' to run the simulation
@@ -158,9 +163,7 @@ if good:
         done = True
     except Exception as Er:
         print(f"\nSomething went wrong during the simulation. Error: {Er}")
-        if tg:
-            for id in chat_id:
-                bot.sendMessage(id, f"{name}'s simulation crashed for some reason. Error: {Er}")
+        tg_message(tg, f"{name}'s simulation crashed for some reason. Error: {Er}")
         good = False
 
 # printing of simulation time on console and on Telegram
@@ -170,14 +173,10 @@ if good:
     sim_time_hour = round(( ( ( end_sim-start_sim ) / 60 ) / 60 ), 2)
     if sim_time_hour > 1:
         sys.stdout.write("\nThe simulation has ended and lasted " + str( sim_time_hour ) + " hours." + '\n')
-        if tg:
-            for id in chat_id:
-                bot.sendMessage(id, f"{name}'s simulation ended after {sim_time_hour} hours.")
+        tg_message(tg, f"{name}'s simulation ended after {sim_time_hour} hours.")
     else:
         sys.stdout.write("\nThe simulation has ended and lasted " + str( sim_time_min ) + " minutes." + '\n')
-        if tg:
-            for id in chat_id:
-                bot.sendMessage(id, f"{name}'s simulation ended after {sim_time_min} minutes.")
+        tg_message(tg, f"{name}'s simulation ended after {sim_time_min} minutes.")
 
     # starts post processing
     sys.stdout.write("\nStarting post processing automation...")
@@ -192,17 +191,13 @@ if good:
         pp_time_min = round(( ( end_pp-start_pp ) / 60 ), 2 )
         time.sleep(0.8)
         sys.stdout.write("The post processing has ended and lasted " + str( pp_time_min ) + " minutes." + '\n')
-        if tg:
-            for id in chat_id:
-                bot.sendMessage(id, f"{name}'s simulation has been post processed in {pp_time_min} minutes.")
+        tg_message(tg, f"{name}'s simulation has been post processed in {pp_time_min} minutes.")
         pp = True
 
     except Exception as Er:
         print(f"Something went wrong during post processing. Error:\n{Er}")
 
-        if tg:
-            for id in chat_id:
-                bot.sendMessage(id, f"{name}'s simulation couldn't be post processed for some reason. Last error:\n{Er}")
+        tg_message(tg, f"{name}'s simulation couldn't be post processed for some reason. Last error:\n{Er}")
         pp = False
 
 
