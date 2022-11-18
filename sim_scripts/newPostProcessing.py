@@ -1,8 +1,9 @@
 # code by scalo
 
-
-from newPostProcessing_LIB import *
 import os, sys
+sys.path.append(os.getcwd())
+from newPostProcessing_LIB import *
+
 
 # crea la cartella dei risultati, se non esiste già
 try:

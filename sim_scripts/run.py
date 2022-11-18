@@ -18,25 +18,18 @@
 # needed to complete both), and then communicates the results to the Telegram Bot.
 
 # Possible improvement points:
-#   - include some Paraview automated post processing for streamlines;
 #   - create functions (e.g. for Telegram messages/Paraview, if included) to be imported from another .py file (more order);
 #   - convert some cutting planes from vtk to png to be included in the pictures sent.
 
 ####################################################################
 
-
 # TELEGRAM INFOS:
 
 # CFD group ID: -1001568561105
 # CFD channel ID: -1001580210471
-# @loretet's chat ID: 693374266
 # PMF_CFD_BOT API token: 2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM
-#"Tre dell'ave maria" channel ID: -1001172054206
 
 ####################################################################
-
-####################################################################
-
 
 ###  COMMON TERMS TRANSLATIONS:  ###
 
@@ -51,11 +44,11 @@
 
 
 # flags to decide whether to use Telegram
-tg = True
+tg = False
 
 # importing all the necessary modules
 
-import itertools, os, math, re, sys, threading, time
+import itertools, os, re, sys, threading, time
 
 if tg:
     import telegram
