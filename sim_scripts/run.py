@@ -154,7 +154,7 @@ if good:
             sys.stdout.write('\r' + char)
             sys.stdout.flush()
             time.sleep(0.2)
-        os.system("echo ")
+        sys.stdout.write(" ")
 
     threading.Thread(target=animate).start()
 
