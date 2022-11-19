@@ -43,7 +43,7 @@
 ####################################################################
 
 # setting up telegram
-tg = False
+tg = True
 if tg:
     import telegram
     bot = telegram.Bot(token='2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM')
@@ -58,7 +58,7 @@ def tg_message(tg, text):
 
 
 # importing all the necessary modules
-import itertools, os, re, sys, threading, time, subprocess
+import itertools, os, re, sys, threading, time, subprocess, pathlib
 
 
 # flexing loretet's ASCII drawing's skills
@@ -80,6 +80,7 @@ time.sleep(0.3)
 
 # initiating variables
 cwd = os.getcwd()
+cwd = pathlib.Path(cwd)
 good = True
 
 # log in
@@ -217,12 +218,13 @@ if tg and pp and good:
     images = []
     final_list = lambda start_list: [start_list[i:i+10] for i in range(0, len(start_list), 10)]
 
-    for root, dirs, files in os.walk(os.path.join(cwd, "results")):
+    for root, dirs, files in os.walk(cwd / "results"):
+        root = pathlib.Path(root)
         for f in files:
             if re.search("\.txt$", f):
-                txt = os.path.join(root, f)
+                txt = root / f
                 continue
-            images.append(telegram.InputMediaPhoto(open(os.path.join(root,f), 'rb')))
+            images.append(telegram.InputMediaPhoto(open(root / f, 'rb')))
     
     images_final = final_list(images)
         
