@@ -68,7 +68,23 @@ def enlist_patches(to_remove):
     elif not paraf_post:
         warnings.warn("Patch containing \"parafango_post\" not found")
 
-    
+def check_am():
+    alette = False
+    muro = False
+    flap = False
+    global line, new_lines, c
+
+    while not re.search("\)", line):
+        if re.search("alette", line):
+            alette = True
+            if re.search("flap", line):
+                flap = True
+        elif re.search("muro", line):
+            muro = True
+        line = c.readline()
+
+    return alette, muro, flap
+
 print("\nScript to create 0/ and system/ dirs")
 
 default = ""
@@ -113,6 +129,18 @@ if not general_fun_dir.is_dir():
     general_fun_dir = pathlib.Path("C:/Users/alexs/Documents/GitHub/PMF/general_functions")
 if not general_fun_dir.is_dir():
     general_fun_dir = pathlib.Path("/mnt/c/users/alexs/Documents/GitHub/PMF/general_functions")
+
+wall_functions_dir = pathlib.Path("/mnt/p/script/system/wall_functions")
+if not wall_functions_dir.is_dir():
+    wall_functions_dir = pathlib.Path("C:/Users/alexs/Documents/GitHub/PMF/wall_functions")
+if not wall_functions_dir.is_dir():
+    wall_functions_dir = pathlib.Path("/mnt/c/users/alexs/Documents/GitHub/PMF/wall_functions")
+
+wing_functions_dir = pathlib.Path("/mnt/p/script/system/wing_functions")
+if not wing_functions_dir.is_dir():
+    wing_functions_dir = pathlib.Path("C:/Users/alexs/Documents/GitHub/PMF/wing_functions")
+if not wing_functions_dir.is_dir():
+    wing_functions_dir = pathlib.Path("/mnt/c/users/alexs/Documents/GitHub/PMF/wing_functions")
 
 zero_dir = cwd / "0"
 system_dir = cwd / "system"
@@ -170,6 +198,15 @@ for file in os.scandir(zero_dir):
                 f.write(line)
 
 with open(os.path.join(system_dir, "controlDict"), "r") as c:
+    line = c.readline()
+    
+    while line != "":
+        if re.search("patches", line):
+            line = c.readline()
+            alette, muro, flap = check_am()
+        line = c.readline()
+
+with open(os.path.join(system_dir, "controlDict"), "r") as c:
     new_lines = []
 
     line = c.readline()
@@ -182,6 +219,19 @@ with open(os.path.join(system_dir, "controlDict"), "r") as c:
                 copy(file.path, system_dir)
                 if file.name != "functionTimeControl":
                     new_lines.append(f"\t#include \"{file.name}\"\n")
+
+            if alette:
+                for file in os.scandir(wing_functions_dir):
+                    if re.search("Flap", file.name) and not flap:
+                        continue
+                    copy(file.path, system_dir)
+                    new_lines.append(f"\t#include \"{file.name}\"\n")
+            
+            if muro:
+                for file in os.scandir(wall_functions_dir):
+                    copy(file.path, system_dir)
+                    new_lines.append(f"\t#include \"{file.name}\"\n")
+
             new_lines.append("\n")
 
             while not re.search("residuals", line):
