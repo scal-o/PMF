@@ -28,6 +28,8 @@ def enlist_patches(to_remove):
     carena = False
     paraf_ant = False
     paraf_post = False
+    alette = False
+    muro = False
 
     for patch in patches_list:
         new_lines.append(patch)
@@ -44,6 +46,13 @@ def enlist_patches(to_remove):
             if paraf_post == False:
                 paraf_post = []
             paraf_post.append(patch.strip("\t\n"))
+
+        elif re.search("alette", patch):
+            if alette == False:
+                alette = []
+            alette.append(patch.strip("\t\n"))
+        elif re.search("muro", patch):
+            muro = True
 
         elif re.search("pilota", patch):
             pilota = True

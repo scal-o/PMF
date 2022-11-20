@@ -1,0 +1,32 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  9
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+Description
+    Calculates pressure and viscous forces over specified patches for a case
+    where the solver is incompressible (pressure is kinematic, e.g. m^2/s^2).
+
+\*---------------------------------------------------------------------------*/
+forcesMuro
+{
+	patches		(muro_sx_alto muro_sx_basso muro_dx_alto muro_dx_basso);
+	CofR		(0 0 0);
+	pitchAxis	(0 1 0);
+	liftDir		(0 0 1);
+	dragDir		(-1 0 0);
+	rho             rhoInf;
+	porosity	yes;
+	rhoInf		1.225;
+	type            forces;
+	libs            ("libforces.so");
+	writeControl    timeStep;
+	timeInterval    1;
+	#include	"functionTimeControl"
+	timeStart       $timeStart;
+	timeEnd         $timeEnd;
+	log             on;
+}
+// ************************************************************************* //
