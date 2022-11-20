@@ -28,6 +28,8 @@ def enlist_patches(to_remove):
     carena = False
     paraf_ant = False
     paraf_post = False
+    alette = False
+    muro = False
 
     for patch in patches_list:
         new_lines.append(patch)
@@ -45,6 +47,13 @@ def enlist_patches(to_remove):
                 paraf_post = []
             paraf_post.append(patch.strip("\t\n"))
 
+        elif re.search("alette", patch):
+            if alette == False:
+                alette = []
+            alette.append(patch.strip("\t\n"))
+        elif re.search("muro", patch):
+            muro = True
+
         elif re.search("pilota", patch):
             pilota = True
         elif re.search("casco", patch):
@@ -59,7 +68,25 @@ def enlist_patches(to_remove):
     elif not paraf_post:
         warnings.warn("Patch containing \"parafango_post\" not found")
 
-    
+def check_am():
+    alette = False
+    muro = False
+    flap = False
+    global line, new_lines, c
+
+    while not re.search("\)", line):
+        if re.search("alette", line):
+            if not alette:
+                alette = []
+            alette.append(line.strip("\t\n"))
+            if re.search("flap", line):
+                flap = line.strip("\t\n")
+        elif re.search("muro", line):
+            muro = True
+        line = c.readline()
+
+    return alette, muro, flap    
+
 print("\nScript to create 0/ and system/ dirs")
 
 default = ""
@@ -104,6 +131,18 @@ if not general_fun_dir.is_dir():
     general_fun_dir = pathlib.Path("C:/Users/alexs/Documents/GitHub/PMF/general_functions")
 if not general_fun_dir.is_dir():
     general_fun_dir = pathlib.Path("/mnt/c/users/alexs/Documents/GitHub/PMF/general_functions")
+
+wall_functions_dir = pathlib.Path("/mnt/p/script/system/wall_functions")
+if not wall_functions_dir.is_dir():
+    wall_functions_dir = pathlib.Path("C:/Users/alexs/Documents/GitHub/PMF/wall_functions")
+if not wall_functions_dir.is_dir():
+    wall_functions_dir = pathlib.Path("/mnt/c/users/alexs/Documents/GitHub/PMF/wall_functions")
+
+wing_functions_dir = pathlib.Path("/mnt/p/script/system/wing_functions")
+if not wing_functions_dir.is_dir():
+    wing_functions_dir = pathlib.Path("C:/Users/alexs/Documents/GitHub/PMF/wing_functions")
+if not wing_functions_dir.is_dir():
+    wing_functions_dir = pathlib.Path("/mnt/c/users/alexs/Documents/GitHub/PMF/wing_functions")
 
 zero_dir = cwd / "0"
 system_dir = cwd / "system"
@@ -160,7 +199,18 @@ for file in os.scandir(zero_dir):
             for line in new_lines:
                 f.write(line)
 
-with open(os.path.join(system_dir, "controlDict"), "r") as c:
+
+with open(system_dir / "controlDict", "r") as c:
+    line = c.readline()
+    
+    while line != "":
+        if re.search("patches", line):
+            line = c.readline()
+            alette, muro, flap = check_am()
+        line = c.readline()
+
+
+with open(system_dir / "controlDict", "r") as c:
     new_lines = []
 
     line = c.readline()
@@ -173,6 +223,19 @@ with open(os.path.join(system_dir, "controlDict"), "r") as c:
                 copy(file.path, system_dir)
                 if file.name != "functionTimeControl":
                     new_lines.append(f"\t#include \"{file.name}\"\n")
+
+            if alette:
+                for file in os.scandir(wing_functions_dir):
+                    if re.search("Flap", file.name) and not flap:
+                        continue
+                    copy(file.path, system_dir)
+                    new_lines.append(f"\t#include \"{file.name}\"\n")
+            
+            if muro:
+                for file in os.scandir(wall_functions_dir):
+                    copy(file.path, system_dir)
+                    new_lines.append(f"\t#include \"{file.name}\"\n")
+
             new_lines.append("\n")
 
             while not re.search("residuals", line):
@@ -193,24 +256,90 @@ with open(os.path.join(system_dir, "controlDict"), "r") as c:
         new_lines.append(line)
         line = c.readline()
 
-with open(os.path.join(system_dir, "controlDict"), "w") as control:
+with open(system_dir / "controlDict", "w") as control:
     for line in new_lines:
         control.write(line)
 
 
-with open(os.path.join(system_dir, "functionTimeControl"), "r") as F:
+if alette:
+    patches = ""
+    for item in alette:
+        patches = patches + item + " "
+        if re.search("mainwing", item):
+            mainwing = item
+        elif re.search("endplate", item):
+            endplate = item
+
+    with open(system_dir / "forcesAlette", "r") as al:
+        new_lines = []
+
+        line = al.readline()
+        while line != '':
+            if re.search("^\tpatches", line):
+                line = f"\tpatches\t({patches});"
+            new_lines.append(line)
+            line = al.readline()
+    
+    with open(system_dir / "forcesAlette", "w") as al:
+        for line in new_lines:
+            al.write(line)
+
+    with open(system_dir / "forcesMainWing", "r") as al:
+        new_lines = []
+
+        line = al.readline()
+        while line != '':
+            if re.search("^\tpatches", line):
+                line = f"\tpatches\t({mainwing});"
+            new_lines.append(line)
+            line = al.readline()
+    
+    with open(system_dir / "forcesMainwing", "w") as al:
+        for line in new_lines:
+            al.write(line)
+
+    with open(system_dir / "forcesEndplate", "r") as al:
+        new_lines = []
+
+        line = al.readline()
+        while line != '':
+            if re.search("^\tpatches", line):
+                line = f"\tpatches\t({endplate});"
+            new_lines.append(line)
+            line = al.readline()
+    
+    with open(system_dir / "forcesEndplate", "w") as al:
+        for line in new_lines:
+            al.write(line)
+
+    if flap:
+        with open(system_dir / "forcesFlap", "r") as al:
+            new_lines = []
+
+            line = al.readline()
+            while line != '':
+                if re.search("^\tpatches", line):
+                    line = f"\tpatches\t({flap});"
+                new_lines.append(line)
+                line = al.readline()
+    
+        with open(system_dir / "forcesFlap", "w") as al:
+            for line in new_lines:
+                al.write(line)
+        
+with open(system_dir / "functionTimeControl", "r") as F:
     new_lines = F.readlines()
 
     for i in range(len(new_lines)):
         if re.search("timeEnd", new_lines[i]):
             new_lines[i] = "timeEnd " + str(endtime) + ";\n"
 
-with open(os.path.join(system_dir, "functionTimeControl"), "w") as timeF:
+with open(system_dir / "functionTimeControl", "w") as timeF:
     for line in new_lines:
         timeF.write(line)
 
 
-with open(os.path.join(system_dir, "fvSolution"), "r") as fv:
+with open(system_dir / "fvSolution", "r") as fv:
     new_lines = []
 
     line = fv.readline()
@@ -223,17 +352,17 @@ with open(os.path.join(system_dir, "fvSolution"), "r") as fv:
         
         line = fv.readline()
 
-with open(os.path.join(system_dir, "fvSolution"), "w") as fvSolution:
+with open(system_dir / "fvSolution", "w") as fvSolution:
     for line in new_lines:
         fvSolution.write(line)
 
 
-with open(os.path.join(system_dir, "forcesCarena"), "r") as forces:
+with open(system_dir / "forcesCarena", "r") as forces:
     new_lines = []
 
     line = forces.readline()
     while line != '':
-        if re.search("patches", line):
+        if re.search("^\tpatches", line):
             line = "\tpatches\t\t(\n"
             new_lines.append(line)
             for patch in carena:
@@ -245,17 +374,17 @@ with open(os.path.join(system_dir, "forcesCarena"), "r") as forces:
         new_lines.append(line)
         line = forces.readline()
 
-with open(os.path.join(system_dir, "forcesCarena"), "w") as forces:
+with open(system_dir / "forcesCarena", "w") as forces:
     for line in new_lines:
         forces.write(line)
 
 
-with open(os.path.join(system_dir, "forcesParafango"), "r") as forces:
+with open(system_dir / "forcesParafango", "r") as forces:
     new_lines = []
 
     line = forces.readline()
     while line != '':
-        if re.search("patches", line):
+        if re.search("^\tpatches", line):
             line = "\tpatches\t\t(\n"
             new_lines.append(line)
             for patch in paraf_ant:
@@ -267,17 +396,17 @@ with open(os.path.join(system_dir, "forcesParafango"), "r") as forces:
         new_lines.append(line)
         line = forces.readline()
 
-with open(os.path.join(system_dir, "forcesParafango"), "w") as forces:
+with open(system_dir / "forcesParafango", "w") as forces:
     for line in new_lines:
         forces.write(line)
 
 
-with open(os.path.join(system_dir, "forcesParafPost"), "r") as forces:
+with open(system_dir / "forcesParafPost", "r") as forces:
     new_lines = []
 
     line = forces.readline()
     while line != '':
-        if re.search("patches", line):
+        if re.search("^\tpatches", line):
             line = "\tpatches\t\t(\n"
             new_lines.append(line)
             for patch in paraf_post:
@@ -289,28 +418,28 @@ with open(os.path.join(system_dir, "forcesParafPost"), "r") as forces:
         new_lines.append(line)
         line = forces.readline()
 
-with open(os.path.join(system_dir, "forcesParafPost"), "w") as forces:
+with open(system_dir / "forcesParafPost", "w") as forces:
     for line in new_lines:
         forces.write(line)
 
 
-with open(os.path.join(system_dir, "forcesPilota"), "r") as forces:
+with open(system_dir / "forcesPilota", "r") as forces:
     new_lines = []
 
     line = forces.readline()
     while line != '':
-        if re.search("patches", line):
+        if re.search("^\tpatches", line):
             new_lines.append("\tpatches\t (pilota casco);\n")
         
         else: new_lines.append(line)
         line = forces.readline()
 
-with open(os.path.join(system_dir, "forcesPilota"), "w") as forces:
+with open(system_dir / "forcesPilota", "w") as forces:
     for line in new_lines:
         forces.write(line)
 
 
-with open(os.path.join(system_dir, "globalForces"), "r") as gforces:
+with open(system_dir / "globalForces", "r") as gforces:
     new_lines = []
 
     line = gforces.readline()
@@ -322,6 +451,6 @@ with open(os.path.join(system_dir, "globalForces"), "r") as gforces:
         else: new_lines.append(line)
         line = gforces.readline()
 
-with open(os.path.join(system_dir, "globalForces"), "w") as gforces:
+with open(system_dir / "globalForces", "w") as gforces:
     for line in new_lines:
         gforces.write(line)

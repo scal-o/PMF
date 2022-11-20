@@ -43,7 +43,7 @@
 ####################################################################
 
 # setting up telegram
-tg = True
+tg = False
 if tg:
     import telegram
     bot = telegram.Bot(token='2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM')
