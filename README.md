@@ -1,3 +1,3 @@
 # PMF
-# Cartella con script utili per postprocessing ed altro
-# Aggiornata da @scalo (team carene)
+## Cartella con script per il run delle simulazioni, post processing ed altro
+## Aggiornata da @scalo (team carene)
