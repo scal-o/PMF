@@ -114,7 +114,7 @@ while True:
         break
     
 
-while True:
+while True and good:
     try:
         dir = input("\nDo you want to start the simulation? (y/n): ").lower()
     except: 
