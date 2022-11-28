@@ -47,7 +47,7 @@ tg = False
 if tg:
     import telegram
     bot = telegram.Bot(token='2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM')
-    chat_id = ["-1001775370943"]
+    chat_id = ["-1001580210471"]
 
 def tg_message(tg, text):
     if tg:
