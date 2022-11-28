@@ -220,9 +220,10 @@ with open(system_dir / "controlDict", "r") as c:
             new_lines.append(line)
             new_lines.append("\n")
             for file in os.scandir(general_fun_dir):
-                copy(file.path, system_dir)
-                if file.name != "functionTimeControl":
-                    new_lines.append(f"\t#include \"{file.name}\"\n")
+                if file.is_file():
+                    copy(file.path, system_dir)
+                    if file.name != "functionTimeControl":
+                        new_lines.append(f"\t#include \"{file.name}\"\n")
 
             if alette:
                 for file in os.scandir(wing_functions_dir):
