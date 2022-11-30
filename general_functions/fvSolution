@@ -1,0 +1,104 @@
+/*--------------------------------------------------------------------------------------------------------------------------------------*\
+|                                                                                                                                        | 
+|    ANSA_VERSION: 22.1.2                                                                                                                | 
+|                                                                                                                                        | 
+|    file created by  A N S A  Sun Nov 20 13:50:32 2022                                                                                  | 
+|                                                                                                                                        | 
+|    Output from: P:/CARENE/sim_aero/2023/petrol/p23_str_u50_capC1_pa0_pp0_piB1_rv3_ANSA/petrol_carena_C_paratia_B_mrf_tamarra.ansa.gz   | 
+|                                                                                                                                        | 
+\*--------------------------------------------------------------------------------------------------------------------------------------*/
+
+
+
+FoamFile
+{
+	version 2.0;
+	format binary;
+	class dictionary;
+	location "";
+	object fvSolution;
+}
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+solvers
+{
+ "p.*" 
+{
+        solver           GAMG;
+        tolerance        1e-10;
+	    relTol		 1e-4;
+        smoother         GaussSeidel;
+        nPreSweeps       0;
+        nPostSweeps      2;
+        cacheAgglomeration on;
+        agglomerator     faceAreaPair;
+        nCellsInCoarsestLevel 10;
+        mergeLevels      1;
+        maxIter         15;
+}
+
+"U.*"
+{
+        solver          PBiCGStab;
+        preconditioner  DILU;
+        tolerance       1e-12;
+        relTol          1e-4;
+        nSweeps         1;
+}
+
+Phi
+{
+  $p;
+}
+
+"(k|epsilon|omega|nuTilda|kFinal|epsilonFinal|omegaFinal|nuTildaFinal)"
+{
+        solver          PBiCGStab;
+        preconditioner  DILU;
+        tolerance       1e-12;
+        relTol          1e-4;
+        nSweeps         1;
+}
+}
+
+SIMPLE
+{
+    nNonOrthogonalCorrectors 1;
+    consistent yes;
+
+    residualControl
+    {
+        p               1e-4;
+        U               1e-3;
+        k               1e-3;
+        omega           1e-3;
+	nuTilda         1e-3;
+    }
+}
+
+potentialFlow
+{
+    nNonOrthogonalCorrectors 30;
+}
+
+relaxationFactors
+{
+    fields
+    {
+        p               1;
+    }
+    equations
+    {
+        U               0.7;
+        k               0.7;
+        omega           0.7;
+	 epsilon           0.7;
+	nuTilda         0.7;
+    }
+}
+
+cache
+{
+    grad(U);
+}

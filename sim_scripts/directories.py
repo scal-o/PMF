@@ -91,25 +91,19 @@ print("\nScript to create 0/ and system/ dirs")
 
 default = ""
 flag = False
+
 while default == "" or flag == False:
 
     try:
-        default = input("\nShould default data for relTol and speed be used? (y/n): ").lower()
+        default = input("\nShould default data for speed be used? (y/n): ").lower()
     except: 
         print("\nPlease only insert y or n as an answer")
 
     if default == "y":
-        relTol = "1e-4"
         speed = "-50"
         flag = True
 
     elif default == "n":
-        while True:
-            relTol = input("\nrelTol (default 1e-4): ")
-            if re.search("[1-9]+e\-[1-9]+0?$", relTol):
-                break
-            else: print("\nInvalid input. Correct format: 1e-4")
-        
         while True:
             speed = input("\nSpeed (default -50): ")
             try:
@@ -199,6 +193,10 @@ for file in os.scandir(zero_dir):
             for line in new_lines:
                 f.write(line)
 
+for file in os.scandir(system_dir):
+    if file.name == "fvSolution":
+        os.remove(file)
+
 
 with open(system_dir / "controlDict", "r") as c:
     line = c.readline()
@@ -220,9 +218,10 @@ with open(system_dir / "controlDict", "r") as c:
             new_lines.append(line)
             new_lines.append("\n")
             for file in os.scandir(general_fun_dir):
-                copy(file.path, system_dir)
-                if file.name != "functionTimeControl":
-                    new_lines.append(f"\t#include \"{file.name}\"\n")
+                if file.is_file():
+                    copy(file.path, system_dir)
+                    if (file.name != "functionTimeControl") and (file.name != "fvSolution"):
+                        new_lines.append(f"\t#include \"{file.name}\"\n")
 
             if alette:
                 for file in os.scandir(wing_functions_dir):
@@ -337,24 +336,6 @@ with open(system_dir / "functionTimeControl", "r") as F:
 with open(system_dir / "functionTimeControl", "w") as timeF:
     for line in new_lines:
         timeF.write(line)
-
-
-with open(system_dir / "fvSolution", "r") as fv:
-    new_lines = []
-
-    line = fv.readline()
-    while line != '':
-
-        if re.search("relTol", line):
-            new_lines.append(f"\trelTol\t\t {relTol};\n")
-        else:
-            new_lines.append(line)
-        
-        line = fv.readline()
-
-with open(system_dir / "fvSolution", "w") as fvSolution:
-    for line in new_lines:
-        fvSolution.write(line)
 
 
 with open(system_dir / "forcesCarena", "r") as forces:

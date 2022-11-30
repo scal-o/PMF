@@ -43,7 +43,7 @@
 ####################################################################
 
 # setting up telegram
-tg = False
+tg = True
 if tg:
     import telegram
     bot = telegram.Bot(token='2137946322:AAFTASN-baZ6iN_dN3e-l22r_WptXKLigNM')
@@ -114,7 +114,7 @@ while True:
         break
     
 
-while True:
+while True and good:
     try:
         dir = input("\nDo you want to start the simulation? (y/n): ").lower()
     except: 
