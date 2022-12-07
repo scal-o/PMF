@@ -171,13 +171,17 @@ if good:
 pp = True
 if good:
     end_sim = time.time()
-    sim_time_min = round(( (end_sim-start_sim ) / 60) , 2)
-    sim_time_hour = round(( ( ( end_sim-start_sim ) / 60 ) / 60 ), 2)
+    sim_time = end_sim - start_sim
+    sim_time_hour = sim_time/ 60 / 60
+
     if sim_time_hour > 1:
-        sys.stdout.write("\nThe simulation has ended and lasted " + str( sim_time_hour ) + " hours." + '\n')
+        sim_time_hour = int(sim_time_hour)
+        sim_time_min = int((sim_time-(sim_time_hour*60*60))/60)
+        sys.stdout.write(f"\nThe simulation has ended and lasted {sim_time_hour}:{sim_time_min} hours.\n")
         tg_message(tg, f"{name}'s simulation ended after {sim_time_hour} hours.")
     else:
-        sys.stdout.write("\nThe simulation has ended and lasted " + str( sim_time_min ) + " minutes." + '\n')
+        sim_time_min = round(sim_time/60, 2)
+        sys.stdout.write(f"\nThe simulation has ended and lasted {sim_time_min} minutes.\n")
         tg_message(tg, f"{name}'s simulation ended after {sim_time_min} minutes.")
 
     # starts post processing
