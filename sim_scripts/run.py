@@ -136,8 +136,15 @@ if good:
         except:
             print("Only numbers and points allowed. Use . as separator, if needed.\n")
 
+    while True:
+        desc = input("Write a short description of your simulation (case, pc...): ")
+        if desc.isalnum(): 
+            break
+        else:
+            print("Only alphanumeric characters allowed.\n")
+
     # Telegram bot announces that somebody started a simulation
-    tg_message(tg, f"{name} just started a simulation. ETA: {eta} hours.")
+    tg_message(tg, f"{name} just started a simulation ({desc}). ETA: {eta} hours.")
 
 if good:       
     # shell running 'sh Allrun.sh' to run the simulation
@@ -197,7 +204,7 @@ if good:
         pp_time_min = round(( ( end_pp-start_pp ) / 60 ), 2 )
         time.sleep(0.8)
         sys.stdout.write("The post processing has ended and lasted " + str( pp_time_min ) + " minutes." + '\n')
-        tg_message(tg, f"{name}'s simulation has been post processed in {pp_time_min} minutes.")
+        tg_message(tg, f"{name}'s simulation ({desc}) has been post processed in {pp_time_min} minutes.")
 
 
     except Exception as Er:
