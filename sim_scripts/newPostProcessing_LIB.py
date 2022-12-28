@@ -34,7 +34,7 @@ def forces(path, part, f, m, ticks_x, ticks_y):
 
         scalarStr = r"\-?[1-9]+\.?[eE\-+0-9]*"  # regex utilizzata per filtrare i dati dal file .dat
 
-        t, fpx, fpy, fpz, fvx, fvy, fvz, fx, fy, fz, mpx, mpy, mpz, mvx, mvy, mvz, mx, my, mz =[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
+        t, fpx, fpy, fpz, fvx, fvy, fvz, fpox, fpoy, fpoz, mpx, mpy, mpz, mvx, mvy, mvz, mpox, mpoy, mpoz =[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
         components = [t, fpx, fpy, fpz, fvx, fvy, fvz, mpx, mpy, mpz, mvx, mvy, mvz]
 
         for line in lines:
@@ -48,9 +48,15 @@ def forces(path, part, f, m, ticks_x, ticks_y):
 
         if f:
             # effettua la somma delle componenti sullo stesso asse
-            fx = [x+y for x,y in zip(fpx,fvx)]
-            fy = [x+y for x,y in zip(fpy,fvy)]
-            fz = [x+y for x,y in zip(fpz,fvz)]
+
+            if re.search("Moto", part):
+                fx = [x+y+z for x,y,z in zip(fpx,fvx,fpox)]
+                fy = [x+y+z for x,y,z in zip(fpy,fvy,fpoy)]
+                fz = [x+y+z for x,y,z in zip(fpz,fvz,fpoz)]
+            else:
+                fx = [x+y for x,y in zip(fpx,fvx)]
+                fy = [x+y for x,y in zip(fpy,fvy)]
+                fz = [x+y for x,y in zip(fpz,fvz)]
 
             # effettua l'analisi statistica
             fx_mean, fx_conf_lev99 = statistical_analysis(fx)
@@ -69,9 +75,14 @@ def forces(path, part, f, m, ticks_x, ticks_y):
 
         if m:
             # effettua la somma delle componenti sullo stesso asse
-            mx = [x+y for x,y in zip(mpx,mvx)]
-            my = [x+y for x,y in zip(mpy,mvy)]
-            mz = [x+y for x,y in zip(mpz,mvz)]
+            if re.search("Moto", part):
+                mx = [x+y+z for x,y,z in zip(mpx,mvx,mpox)]
+                my = [x+y+z for x,y,z in zip(mpy,mvy,mpoy)]
+                mz = [x+y+z for x,y,z in zip(mpz,mvz,mpoz)]
+            else:
+                mx = [x+y for x,y in zip(mpx,mvx)]
+                my = [x+y for x,y in zip(mpy,mvy)]
+                mz = [x+y for x,y in zip(mpz,mvz)]
 
             # effettua l'analisi statistica  
             mx_mean, mx_conf_lev99 = statistical_analysis(mx)
