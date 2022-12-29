@@ -58,5 +58,9 @@ for root, dirs, files in os.walk(os.path.join(os.getcwd(), "postProcessing")):
 
 
 for path, part in zip(path_list, part_list):
-    if re.search("global", part): part = re.sub("global", "Moto", part)
+    if re.search("global", part): 
+        part = re.sub("global", "Moto", part)
+        forces(path, part, force_calc, moment_calc, n_ticks_x, n_ticks_y)
+        part = re.sub("Moto", "Moto con porosità", part)
     forces(path, part, force_calc, moment_calc, n_ticks_x, n_ticks_y)
+    

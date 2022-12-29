@@ -32,24 +32,24 @@ def forces(path, part, f, m, ticks_x, ticks_y):
     with open(path, 'r') as pipefile, open("results/Risultati analisi.txt", 'a') as res:  
         lines = pipefile.readlines()
 
-        scalarStr = r"\-?[1-9]+\.?[eE\-+0-9]*"  # regex utilizzata per filtrare i dati dal file .dat
+        scalarStr = r"\-?[0-9]+\.?[eE\-+0-9]*"  # regex utilizzata per filtrare i dati dal file .dat
 
         t, fpx, fpy, fpz, fvx, fvy, fvz, fpox, fpoy, fpoz, mpx, mpy, mpz, mvx, mvy, mvz, mpox, mpoy, mpoz =[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
-        components = [t, fpx, fpy, fpz, fvx, fvy, fvz, mpx, mpy, mpz, mvx, mvy, mvz]
+        components = [t, fpx, fpy, fpz, fvx, fvy, fvz, fpox, fpoy, fpoz, mpx, mpy, mpz, mvx, mvy, mvz, mpox, mpoy, mpoz]
 
         for line in lines:
             file_data = re.findall(scalarStr, line)  # per ogni riga del file restituisce tutte le istanze della regex definita prima
             
-            if file_data != [] and len(file_data) == 13:  # controlla che la riga non sia vuota e/o che la lettura sia stata effettuata correttamente                    
+            if file_data != [] and len(file_data) == 19:  # controlla che la riga non sia vuota e/o che la lettura sia stata effettuata correttamente                    
                 for i, column in enumerate(components):
                     column.append(float(file_data[i])) # aggiunge ad ogni lista la componente calcolata alla nuova iterazione
 
-        res.write("\n\nForze e momenti "+ part + '\n')
+        moto_poro = re.search("Moto con porosità", part)
+        if not moto_poro: res.write("\n\nForze e momenti "+ part + '\n')
 
         if f:
             # effettua la somma delle componenti sullo stesso asse
-
-            if re.search("Moto", part):
+            if moto_poro:
                 fx = [x+y+z for x,y,z in zip(fpx,fvx,fpox)]
                 fy = [x+y+z for x,y,z in zip(fpy,fvy,fpoy)]
                 fz = [x+y+z for x,y,z in zip(fpz,fvz,fpoz)]
@@ -59,14 +59,15 @@ def forces(path, part, f, m, ticks_x, ticks_y):
                 fz = [x+y for x,y in zip(fpz,fvz)]
 
             # effettua l'analisi statistica
-            fx_mean, fx_conf_lev99 = statistical_analysis(fx)
-            fy_mean, fy_conf_lev99 = statistical_analysis(fy)
-            fz_mean, fz_conf_lev99 = statistical_analysis(fz)
+            fx_mean, fx_conf_lev99 = statistical_analysis(fx[-250:])
+            fy_mean, fy_conf_lev99 = statistical_analysis(fy[-250:])
+            fz_mean, fz_conf_lev99 = statistical_analysis(fz[-250:])
 
             # scrive i risultati dell'analisi statistica su un file di output
-            res.write("Fx = "+ str(fx_mean)+ " +/- "+ str(fx_conf_lev99) + '\n')
-            res.write("Fy = "+ str(fy_mean)+ " +/- "+ str(fy_conf_lev99) + '\n')
-            res.write("Fz = "+ str(fz_mean)+ " +/- "+ str(fz_conf_lev99) + '\n')
+            if not moto_poro:
+                res.write("Fx = "+ str(fx_mean)+ " +/- "+ str(fx_conf_lev99) + '\n')
+                res.write("Fy = "+ str(fy_mean)+ " +/- "+ str(fy_conf_lev99) + '\n')
+                res.write("Fz = "+ str(fz_mean)+ " +/- "+ str(fz_conf_lev99) + '\n')
 
             # traccia i grafici
             forces = [fx,fy,fz]
@@ -75,7 +76,7 @@ def forces(path, part, f, m, ticks_x, ticks_y):
 
         if m:
             # effettua la somma delle componenti sullo stesso asse
-            if re.search("Moto", part):
+            if moto_poro:
                 mx = [x+y+z for x,y,z in zip(mpx,mvx,mpox)]
                 my = [x+y+z for x,y,z in zip(mpy,mvy,mpoy)]
                 mz = [x+y+z for x,y,z in zip(mpz,mvz,mpoz)]
@@ -85,14 +86,16 @@ def forces(path, part, f, m, ticks_x, ticks_y):
                 mz = [x+y for x,y in zip(mpz,mvz)]
 
             # effettua l'analisi statistica  
-            mx_mean, mx_conf_lev99 = statistical_analysis(mx)
-            my_mean, my_conf_lev99 = statistical_analysis(my)
-            mz_mean, mz_conf_lev99 = statistical_analysis(mz)
+            mx_mean, mx_conf_lev99 = statistical_analysis(mx[-250:])
+            my_mean, my_conf_lev99 = statistical_analysis(my[-250:])
+            mz_mean, mz_conf_lev99 = statistical_analysis(mz[-250:])
+
 
             # scrive i risultati dell'analisi statistica su un file di output
-            res.write("Mx = "+ str(mx_mean)+ " +/- "+ str(mx_conf_lev99) + '\n')
-            res.write("My = "+ str(my_mean)+ " +/- "+ str(my_conf_lev99) + '\n')
-            res.write("Mz = "+ str(mz_mean)+ " +/- "+ str(mz_conf_lev99) + '\n')
+            if not moto_poro:
+                res.write("Mx = "+ str(mx_mean)+ " +/- "+ str(mx_conf_lev99) + '\n')
+                res.write("My = "+ str(my_mean)+ " +/- "+ str(my_conf_lev99) + '\n')
+                res.write("Mz = "+ str(mz_mean)+ " +/- "+ str(mz_conf_lev99) + '\n')
 
             # traccia i grafici
             moments = [mx,my,mz]
@@ -108,8 +111,7 @@ def fm_plot(t, fm, mean_fm, mode, n_ticks_x, n_ticks_y, part):
     # dei grafici). n_ticks_x e n_ticks_y sono argomenti opzionali utilizzati per variare 
     # la spaziatura degli assi (default = 10)
 
-    # crea figure e Axes ed imposta label e titoli
-    fig, axs = plt.subplots(ncols=len(fm), sharex=True, figsize=(24, 5))
+    # imposta label e titoli
     if mode == "forces":
         xlabel = '$F_x$'
         ylabel = '$F_y$'
@@ -123,27 +125,41 @@ def fm_plot(t, fm, mean_fm, mode, n_ticks_x, n_ticks_y, part):
         tit = "Momenti "
         m_lab = '$M_'
 
-    axs[0].plot(t,fm[0], label =xlabel)
-    axs[0].plot(t, [mean_fm[0]]*len(t), '-.', linewidth = 0.8, label = m_lab +'{x, mean}$')
+    part_titles = [part, part + " finali"]
+    t = [t, t[-250:]]
+    fm0 = [fm[0], fm[0][-250:]]
+    fm1 = [fm[1], fm[1][-250:]]
+    fm2 = [fm[2], fm[2][-250:]]
 
-    axs[1].plot(t,fm[1], label =ylabel)
-    axs[1].plot(t, [mean_fm[1]]*len(t), '-.', linewidth = 0.8, label = m_lab +'{y, mean}$')
-    axs[1].set_title(tit + part + " [N]", fontweight = "bold")
+    for t_, fmx, fmy, fmz, part in zip(t, fm0, fm1, fm2, part_titles):
 
-    axs[2].plot(t,fm[2], label =zlabel)
-    axs[2].plot(t, [mean_fm[2]]*len(t), '-.', linewidth = 0.8, label = m_lab +'{z, mean}$')
+        # crea figure e Axes
+        fig, axs = plt.subplots(ncols=len(fm), sharex=True, figsize=(24, 5))
 
-    #applica spaziatura assi ed attiva griglia e legenda
-    for graph in axs:
-        graph.xaxis.set_major_locator(ticker.MaxNLocator(n_ticks_x))
-        graph.yaxis.set_major_locator(ticker.MaxNLocator(n_ticks_y))
+        axs[0].plot(t_,fmx, label =xlabel)
 
-        graph.grid(True)
-        graph.legend()
+        axs[1].plot(t_,fmy, label =ylabel)
+        axs[1].set_title(tit + part + " [N]", fontweight = "bold")
 
-    #salva i grafici
-    fig.savefig('results/'+tit+part+'.png', format = 'png', dpi = 250) # l'argomento dpi indica la risoluzione dell'immagine finale
+        axs[2].plot(t_,fmz, label =zlabel)
 
+        if part == part_titles[1]:
+            axs[0].axhline([mean_fm[0]], linestyle='-.', linewidth = 0.8, label = m_lab +'{x, mean}$', color="orange")
+            axs[1].axhline([mean_fm[1]], linestyle='-.', linewidth = 0.8, label = m_lab +'{y, mean}$', color="orange")
+            axs[2].axhline([mean_fm[2]], linestyle='-.', linewidth = 0.8, label = m_lab +'{z, mean}$', color="orange")
+
+
+        #applica spaziatura assi ed attiva griglia e legenda
+        for graph in axs:
+            graph.xaxis.set_major_locator(ticker.MaxNLocator(n_ticks_x))
+            graph.yaxis.set_major_locator(ticker.MaxNLocator(n_ticks_y))
+
+            graph.grid(True)
+            graph.legend()
+
+        #salva i grafici
+        fig.savefig('results/'+tit+part+'.png', format = 'png', dpi = 250) # l'argomento dpi indica la risoluzione dell'immagine finale
+        plt.close(fig)
 
 
 
@@ -159,27 +175,35 @@ def coefficients(path, tick_spacing_x = 50, tick_spacing_y = 0.05):
         cl.append(column[3])
 
     # effettua l'analisi statistica
-    cd_mean, cd_conf_lev99 = statistical_analysis(cd)
-    cl_mean, cl_conf_lev99 = statistical_analysis(cl)
+    cd_mean, cd_conf_lev99 = statistical_analysis(cd[-250:])
+    cl_mean, cl_conf_lev99 = statistical_analysis(cl[-250:])
+
+    t = [t, t[-250:]]
+    cd = [cd, cd[-250:]]
+    cl = [cl, cl[-250:]]
+    coeff_titles = ["Coefficienti aerodinamici totali", "Coefficienti aerodinamici finali"]
 
     # traccia i grafici di cd e cl
-    fig, ax = plt.subplots() # crea figura e Axes
-    
-    plt.title("Coefficienti aerodinamici", fontweight = "bold")
-    ax.plot(t, cd, label ='$C_D$') # plotta cd e cl con il numero di iterazioni
-    ax.plot(t, cl, label ='$C_L$')
-    ax.axhline(cd_mean, linestyle='--', linewidth = 0.8, label = '$C_{D, mean}$', color = 'red')    
-    ax.axhline(cl_mean, linestyle='--', linewidth = 0.8, label = '$C_{L, mean}$', color = 'green')
+    for t_, cd_, cl_, title in zip(t, cd, cl, coeff_titles):
+        fig, ax = plt.subplots() # crea figura e Axes
+        plt.title(f"{title}", fontweight = "bold")
+        ax.plot(t_, cd_, label ='$C_D$') # plotta cd e cl con il numero di iterazioni
+        ax.plot(t_, cl_, label ='$C_L$')
 
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(tick_spacing_x)) # spazia asse x di quantità definita prima
-    ax.yaxis.set_major_locator(ticker.MultipleLocator(tick_spacing_y)) # spazia asse y di quantità definita prima
+        if title == coeff_titles[1]:
+            ax.axhline(cd_mean, linestyle='--', linewidth = 0.8, label = '$C_{D, mean}$', color = 'red')    
+            ax.axhline(cl_mean, linestyle='--', linewidth = 0.8, label = '$C_{L, mean}$', color = 'green')
 
-    plt.legend() # attiva legenda
-    plt.grid()   # attiva griglia
-    ax.set_xlabel('Iterazioni') # nome asse x
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(tick_spacing_x)) # spazia asse x di quantità definita prima
+        ax.yaxis.set_major_locator(ticker.MultipleLocator(tick_spacing_y)) # spazia asse y di quantità definita prima
 
-    # salva i grafici
-    plt.savefig('results/Coefficienti.png', dpi = 250)  # l'argomento dpi indica la risoluzione dell'immagine finale
+        plt.legend() # attiva legenda
+        plt.grid()   # attiva griglia
+        ax.set_xlabel('Iterazioni') # nome asse x
+
+        # salva i grafici
+        plt.savefig(f"results/{title}.png", dpi = 250)  # l'argomento dpi indica la risoluzione dell'immagine finale
+        plt.close(fig)
 
     with open("results/Risultati analisi.txt", 'a') as res:
         res.write("\nCd = " + str(cd_mean) + " +/- " + str(cd_conf_lev99))
@@ -221,3 +245,4 @@ def residuals(path):
 
     # salva i grafici
     plt.savefig("results/Residui.png", dpi = 250) # l'argomento dpi indica la risoluzione dell'immagine finale
+    plt.close(fig)
