@@ -23,6 +23,7 @@ def enlist_patches(to_remove):
         line = c.readline() 
     patches_list.sort()
 
+    global pilota
     pilota = False
     casco = False
     carena = False
@@ -47,7 +48,7 @@ def enlist_patches(to_remove):
                 paraf_post = []
             paraf_post.append(patch.strip("\t\n"))
 
-        elif re.search("alette", patch):
+        elif re.search("wing", patch):
             if alette == False:
                 alette = []
             alette.append(patch.strip("\t\n"))
@@ -55,7 +56,9 @@ def enlist_patches(to_remove):
             muro = True
 
         elif re.search("pilota", patch):
-            pilota = True
+            if not pilota:
+                pilota = []
+            pilota.append(patch.strip("\t\n"))
         elif re.search("casco", patch):
             casco = True
 
@@ -75,7 +78,7 @@ def check_am():
     global line, new_lines, c
 
     while not re.search("\)", line):
-        if re.search("alette", line):
+        if re.search("wing", line):
             if not alette:
                 alette = []
             alette.append(line.strip("\t\n"))
@@ -185,6 +188,20 @@ for file in os.scandir(zero_dir):
                 elif re.search("internalField", line) and re.search("U", filename):
                     line = f"internalField uniform ({speed}. 0. 0.);\n"
 
+                elif re.search("entrata.+no_layer|uscita.+no_layer", line):
+
+                    if re.search("k|omega", filename):
+                        for new_line in new_lines:
+                            if re.search("internalField", new_line):
+                                val = re.search("[0-9\.]+", new_line).group()
+                        if re.search("entrata", line):
+                            sub("type", f"\t\ttype inletOutlet;\n\t\tvalue uniform {val};\n\t\tinletValue uniform {val};\n", skipline=True)
+                        elif re.search("uscita", line):
+                            sub("type", f"\t\ttype fixedValue;\n\t\tvalue uniform {val};\n", skipline=True)
+
+                    elif re.search("nut", filename):
+                        sub("type", "\t\ttype calculated;\n\t\tvalue uniform 0.;\n")
+
                 new_lines.append(line)
                 line = f.readline()            
 
@@ -250,7 +267,7 @@ with open(system_dir / "controlDict", "r") as c:
             line = c.readline()
 
         elif re.search("endTime.*[0-9]+", line):
-            endtime = re.search("[0-9]+", line).group()
+            endtime = int(re.search("[0-9]+", line).group())
 
         new_lines.append(line)
         line = c.readline()
@@ -264,7 +281,7 @@ if alette:
     patches = ""
     for item in alette:
         patches = patches + item + " "
-        if re.search("mainwing", item):
+        if re.search("main", item):
             mainwing = item
         elif re.search("endplate", item):
             endplate = item
@@ -331,12 +348,23 @@ with open(system_dir / "functionTimeControl", "r") as F:
 
     for i in range(len(new_lines)):
         if re.search("timeEnd", new_lines[i]):
-            new_lines[i] = "timeEnd " + str(endtime) + ";\n"
+            new_lines[i] = f"timeEnd {str(endtime)};\n"
 
 with open(system_dir / "functionTimeControl", "w") as timeF:
     for line in new_lines:
         timeF.write(line)
 
+
+with open(system_dir / "fieldAverage", "r") as fA:
+    new_lines = fA.readlines()
+
+    for i in range(len(new_lines)):
+        if re.search("timeStart", new_lines[i]):
+            new_lines[i] = f"\ttimeStart\t{str(endtime-250)};\n"
+
+with open(system_dir / "fieldAverage", "w") as fA:
+    for line in new_lines:
+        fA.write(line)
 
 with open(system_dir / "forcesCarena", "r") as forces:
     new_lines = []
@@ -405,12 +433,17 @@ with open(system_dir / "forcesParafPost", "w") as forces:
 
 
 with open(system_dir / "forcesPilota", "r") as forces:
+
+    patches = ""
+    for item in pilota:
+        patches = patches + item + " "
+
     new_lines = []
 
     line = forces.readline()
     while line != '':
         if re.search("^\tpatches", line):
-            new_lines.append("\tpatches\t (pilota casco);\n")
+            new_lines.append(f"\tpatches\t ({patches}casco);\n")
         
         else: new_lines.append(line)
         line = forces.readline()
