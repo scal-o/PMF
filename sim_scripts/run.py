@@ -138,7 +138,7 @@ if good:
 
     while True:
         desc = input("Write a short description of your simulation (case, pc...): ")
-        if desc.isalnum(): 
+        if desc.isprintable(): 
             break
         else:
             print("Only alphanumeric characters allowed.\n")
