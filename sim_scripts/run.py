@@ -141,7 +141,7 @@ if good:
         if desc.isprintable(): 
             break
         else:
-            print("Only alphanumeric characters allowed.\n")
+            print("Only printable characters allowed.\n")
 
     # Telegram bot announces that somebody started a simulation
     tg_message(tg, f"{name} just started a simulation ({desc}). ETA: {eta} hours.")
